@@ -1,0 +1,59 @@
+#include "meter_model.h"
+#include "json_serializer.h"
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("Wokwi JSON Serializer Demo Start");
+}
+
+void loop() {
+
+  static DataPoint point = {
+      .timestamp = "1970-01-01 00:00",
+      .meter_datetime = "1970-01-01 00:00",
+      .total_m3 = 107.752,
+      .status = "OK"
+  };
+
+  static DeviceReading device = {
+      .media = "water",
+      .meter = "waterstarm",
+      .deviceId = "stromleser_50898527",
+      .unit = "m3",
+      .data = &point,
+      .data_count = 1
+  };
+
+  static Values values = {
+      .device_count = 1,
+      .readings = &device
+  };
+
+  static MeterData data = {
+      .meta = {
+          .gatewayId = "gateway_1234",
+          .date = "1970-01-01",
+          .deviceType = "stromleser",
+          .interval_minutes = 15,
+          .total_readings = 1
+      },
+      .values = values
+  };
+
+  char buffer[1024];
+  int needed = 0;
+
+  JsonStatus st = serialize_to_json(&data, buffer, sizeof(buffer), &needed);
+
+  if (st == JSON_OK) {
+      Serial.println("Generated JSON:");
+      Serial.println(buffer);
+
+      Serial.print("Size: ");
+      Serial.println(needed);
+  } else {
+      Serial.println("Buffer too small or invalid input");
+  }
+
+  delay(4000);
+}
